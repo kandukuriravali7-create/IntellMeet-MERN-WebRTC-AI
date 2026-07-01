@@ -1,0 +1,284 @@
+import Task from "../models/Task.js";
+import User from "../models/User.js";
+import Meeting from "../models/Meeting.js";
+
+// =====================================
+// Create Task
+// =====================================
+export const createTask = async (req, res) => {
+  try {
+    const {
+      meetingId,
+      title,
+      description,
+      assignedTo,
+      deadline,
+    } = req.body;
+
+    if (!title || !assignedTo) {
+      return res.status(400).json({
+        success: false,
+        message: "Title and Assigned User are required",
+      });
+    }
+
+    const assignedUser = await User.findById(assignedTo);
+
+    if (!assignedUser) {
+      return res.status(404).json({
+        success: false,
+        message: "Assigned User not found",
+      });
+    }
+
+    if (meetingId) {
+      const meeting = await Meeting.findById(meetingId);
+
+      if (!meeting) {
+        return res.status(404).json({
+          success: false,
+          message: "Meeting not found",
+        });
+      }
+    }
+
+    const task = await Task.create({
+      meetingId,
+      title,
+      description,
+      assignedTo,
+      deadline,
+      status: "Pending",
+    });
+
+    res.status(201).json({
+      success: true,
+      message: "Task Created Successfully",
+      task,
+    });
+
+  } catch (error) {
+
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+
+  }
+};
+
+// =====================================
+// Get All Tasks
+// =====================================
+export const getTasks = async (req, res) => {
+
+  try {
+
+    const tasks = await Task.find()
+      .populate("assignedTo", "fullName email")
+      .populate("meetingId", "title meetingCode")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      count: tasks.length,
+      tasks,
+    });
+
+  } catch (error) {
+
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+
+  }
+
+};
+
+// =====================================
+// Get Task By ID
+// =====================================
+export const getTaskById = async (req, res) => {
+
+  try {
+
+    const task = await Task.findById(req.params.id)
+      .populate("assignedTo", "fullName email avatar")
+      .populate("meetingId", "title meetingCode");
+
+    if (!task) {
+      return res.status(404).json({
+        success: false,
+        message: "Task not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      task,
+    });
+
+  } catch (error) {
+
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+
+  }
+
+};
+
+// =====================================
+// Update Task
+// =====================================
+export const updateTask = async (req, res) => {
+
+  try {
+
+    const task = await Task.findById(req.params.id);
+
+    if (!task) {
+      return res.status(404).json({
+        success: false,
+        message: "Task not found",
+      });
+    }
+
+    const updatedTask = await Task.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true }
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Task Updated Successfully",
+      task: updatedTask,
+    });
+
+  } catch (error) {
+
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+
+  }
+
+};
+
+// =====================================
+// Delete Task
+// =====================================
+export const deleteTask = async (req, res) => {
+
+  try {
+
+    const task = await Task.findById(req.params.id);
+
+    if (!task) {
+      return res.status(404).json({
+        success: false,
+        message: "Task not found",
+      });
+    }
+
+    await task.deleteOne();
+
+    res.status(200).json({
+      success: true,
+      message: "Task Deleted Successfully",
+    });
+
+  } catch (error) {
+
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+
+  }
+
+};
+
+// =====================================
+// Update Task Status
+// =====================================
+export const updateTaskStatus = async (req, res) => {
+
+  try {
+
+    const { status } = req.body;
+
+    const allowedStatus = [
+      "Pending",
+      "In Progress",
+      "Completed",
+    ];
+
+    if (!allowedStatus.includes(status)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid Status",
+      });
+    }
+
+    const task = await Task.findById(req.params.id);
+
+    if (!task) {
+      return res.status(404).json({
+        success: false,
+        message: "Task not found",
+      });
+    }
+
+    task.status = status;
+
+    await task.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Task Status Updated",
+      task,
+    });
+
+  } catch (error) {
+
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+
+  }
+
+};
+
+// =====================================
+// Get Logged-in User Tasks
+// =====================================
+export const getMyTasks = async (req, res) => {
+
+  try {
+
+    const tasks = await Task.find({
+      assignedTo: req.user._id,
+    }).populate("meetingId", "title meetingCode");
+
+    res.status(200).json({
+      success: true,
+      count: tasks.length,
+      tasks,
+    });
+
+  } catch (error) {
+
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+
+  }
+
+};
