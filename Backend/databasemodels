@@ -1,1 +1,334 @@
+models/User.js
+import mongoose from "mongoose";
 
+const userSchema = new mongoose.Schema(
+  {
+    fullName: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+      trim: true,
+    },
+
+    password: {
+      type: String,
+      required: true,
+    },
+
+    avatar: {
+      type: String,
+      default: "",
+    },
+
+    role: {
+      type: String,
+      enum: ["Admin", "Member"],
+      default: "Member",
+    },
+
+    department: {
+      type: String,
+      default: "",
+    },
+
+    designation: {
+      type: String,
+      default: "",
+    },
+
+    phone: {
+      type: String,
+      default: "",
+    },
+
+    status: {
+      type: String,
+      enum: ["Online", "Offline", "Busy"],
+      default: "Offline",
+    },
+
+    teams: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Team",
+      },
+    ],
+  },
+  {
+    timestamps: true,
+  }
+);
+
+export default mongoose.model("User", userSchema);
+2. models/Team.js
+import mongoose from "mongoose";
+
+const teamSchema = new mongoose.Schema(
+  {
+    teamName: {
+      type: String,
+      required: true,
+    },
+
+    description: {
+      type: String,
+      default: "",
+    },
+
+    owner: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+
+    members: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
+  },
+  {
+    timestamps: true,
+  }
+);
+
+export default mongoose.model("Team", teamSchema);
+3. models/Meeting.js
+import mongoose from "mongoose";
+
+const meetingSchema = new mongoose.Schema(
+  {
+    title: {
+      type: String,
+      required: true,
+    },
+
+    description: {
+      type: String,
+      default: "",
+    },
+
+    meetingCode: {
+      type: String,
+      unique: true,
+      required: true,
+    },
+
+    host: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+
+    participants: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
+
+    meetingDate: {
+      type: Date,
+      required: true,
+    },
+
+    duration: {
+      type: Number,
+      default: 0,
+    },
+
+    recording: {
+      type: String,
+      default: "",
+    },
+
+    status: {
+      type: String,
+      enum: ["Scheduled", "Live", "Completed"],
+      default: "Scheduled",
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
+
+export default mongoose.model("Meeting", meetingSchema);
+4. models/Chat.js
+import mongoose from "mongoose";
+
+const chatSchema = new mongoose.Schema(
+  {
+    meetingId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Meeting",
+      required: true,
+    },
+
+    sender: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+
+    message: {
+      type: String,
+      required: true,
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
+
+export default mongoose.model("Chat", chatSchema);
+5. models/Task.js
+import mongoose from "mongoose";
+
+const taskSchema = new mongoose.Schema(
+  {
+    meetingId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Meeting",
+    },
+
+    title: {
+      type: String,
+      required: true,
+    },
+
+    description: {
+      type: String,
+      default: "",
+    },
+
+    assignedTo: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+
+    deadline: {
+      type: Date,
+    },
+
+    status: {
+      type: String,
+      enum: ["Pending", "In Progress", "Completed"],
+      default: "Pending",
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
+
+export default mongoose.model("Task", taskSchema);
+6. models/Summary.js
+import mongoose from "mongoose";
+
+const summarySchema = new mongoose.Schema(
+  {
+    meetingId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Meeting",
+      required: true,
+    },
+
+    transcript: {
+      type: String,
+      default: "",
+    },
+
+    summary: {
+      type: String,
+      default: "",
+    },
+
+    actionItems: [
+      {
+        task: String,
+        assignedTo: String,
+      },
+    ],
+  },
+  {
+    timestamps: true,
+  }
+);
+
+export default mongoose.model("Summary", summarySchema);
+7. models/Notification.js
+import mongoose from "mongoose";
+
+const notificationSchema = new mongoose.Schema(
+  {
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+
+    message: {
+      type: String,
+      required: true,
+    },
+
+    read: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
+
+export default mongoose.model("Notification", notificationSchema);
+8. models/File.js
+import mongoose from "mongoose";
+
+const fileSchema = new mongoose.Schema(
+  {
+    meetingId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Meeting",
+    },
+
+    uploadedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+
+    fileName: {
+      type: String,
+      required: true,
+    },
+
+    fileUrl: {
+      type: String,
+      required: true,
+    },
+
+    fileType: {
+      type: String,
+      default: "",
+    },
+
+    fileSize: {
+      type: Number,
+      default: 0,
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
+
+export default mongoose.model("File", fileSchema);
