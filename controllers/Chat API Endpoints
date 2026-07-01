@@ -1,0 +1,34 @@
+1️⃣ Send Message
+
+POST
+
+http://localhost:5000/api/chat/send
+
+Header
+
+Authorization: Bearer YOUR_JWT_TOKEN
+
+Body
+
+{
+    "meetingId":"MEETING_ID",
+    "message":"Hello Everyone!"
+}
+2️⃣ Get Meeting Chat
+
+GET
+
+http://localhost:5000/api/chat/MEETING_ID
+
+Header
+
+Authorization: Bearer YOUR_JWT_TOKEN
+3️⃣ Delete Message
+
+DELETE
+
+http://localhost:5000/api/chat/MESSAGE_ID
+
+Header
+
+Authorization: Bearer YOUR_JWT_TOKEN
