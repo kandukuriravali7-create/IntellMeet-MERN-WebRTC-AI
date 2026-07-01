@@ -1,0 +1,31 @@
+POST
+
+http://localhost:5000/api/meetings/create
+
+Headers
+
+Authorization: Bearer YOUR_JWT_TOKEN
+
+Body (JSON)
+
+{
+  "title": "Project Discussion",
+  "description": "Weekly team sync meeting",
+  "meetingDate": "2026-07-10T10:00:00Z",
+  "duration": 60
+}
+Join Meeting
+
+POST
+
+http://localhost:5000/api/meetings/join
+
+Headers
+
+Authorization: Bearer YOUR_JWT_TOKEN
+
+Body (JSON)
+
+{
+  "meetingCode": "INT-ABC123"
+}
